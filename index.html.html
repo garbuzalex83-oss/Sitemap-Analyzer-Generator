@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Sitemap Analyzer | SEO Tool by Garbuz Alexander</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #ffffff;
+            --secondary: #f0f0f0;
+            --background: #0a0a0a;
+            --surface: #1a1a1a;
+            --border: #ffffff;
+            --text: #ffffff;
+            --text-dim: #aaaaaa;
+            --error: #ff0040;
+            --warning: #ffaa00;
+            --success: #ffffff;
+        }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        #matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.03;
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            border: 2px solid var(--border);
+            background: var(--surface);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .header h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 3em;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.8;
+            letter-spacing: 3px;
+        }
+
+        .lang-switch {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 8px 20px;
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .lang-btn.active {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .lang-btn:hover {
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 30px;
+            border: 2px solid var(--border);
+            background: var(--surface);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-family: 'Orbitron', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .tab::before {
+            content: '[ ]';
+            margin-right: 10px;
+        }
+
+        .tab.active::before {
+            content: '[X]';
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+        }
+
+        .tab.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text);
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-section {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .input-section h3 {
+            font-family: 'Orbitron', monospace;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .input-section h3::before {
+            content: '> ';
+            color: var(--primary);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .input-group label::before {
+            content: '// ';
+            color: var(--text-dim);
+        }
+
+        textarea, select, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--border);
+            color: var(--text);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        textarea {
+            min-height: 150px;
+        }
+
+        textarea:focus, select:focus, input:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            border-color: var(--primary);
+        }
+
+        .btn {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 15px 40px;
+            font-family: 'Orbitron', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: left 0.3s;
+        }
+
+        .btn:hover::before {
+            left: 0;
+        }
+
+        .btn:hover {
+            box-shadow: 0 0 20px var(--primary);
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            display: none;
+            background: var(--surface);
+            border: 2px solid var(--border);
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid var(--border);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .console-output {
+            background: #000;
+            border: 2px solid var(--border);
+            padding: 20px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+
+        .console-line {
+            margin: 5px 0;
+            animation: typing 0.3s;
+        }
+
+        @keyframes typing {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .console-line::before {
+            content: '> ';
+            color: var(--primary);
+        }
+
+        .console-line.success {
+            color: var(--success);
+        }
+
+        .console-line.error {
+            color: var(--error);
+        }
+
+        .console-line.warning {
+            color: var(--warning);
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .stat-card h3 {
+            font-size: 11px;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            opacity: 0.7;
+            text-transform: uppercase;
+        }
+
+        .stat-card .value {
+            font-family: 'Orbitron', monospace;
+            font-size: 36px;
+            font-weight: 900;
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .stat-card.error .value {
+            color: var(--error);
+            text-shadow: 0 0 10px var(--error);
+        }
+
+        .stat-card.warning .value {
+            color: var(--warning);
+            text-shadow: 0 0 10px var(--warning);
+        }
+
+        .section {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .section h3 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .section h3::before {
+            content: '[!] ';
+            color: var(--primary);
+        }
+
+        .info-block {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid var(--primary);
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .xml-output {
+            background: #000;
+            border: 2px solid var(--border);
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            max-height: 600px;
+            overflow: auto;
+            color: var(--text);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #000;
+        }
+
+        .data-table th {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 15px 10px;
+            text-align: left;
+            font-family: 'Orbitron', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .data-table td {
+            border: 1px solid var(--border);
+            padding: 12px 10px;
+            font-size: 12px;
+        }
+
+        .data-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .data-table td:first-child {
+            font-family: 'Orbitron', monospace;
+            color: var(--text-dim);
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border: 1px solid;
+            font-family: 'Orbitron', monospace;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .priority-high {
+            border-color: var(--success);
+            color: var(--success);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .priority-medium {
+            border-color: var(--warning);
+            color: var(--warning);
+            box-shadow: 0 0 10px rgba(255, 170, 0, 0.3);
+        }
+
+        .priority-low {
+            border-color: var(--error);
+            color: var(--error);
+            box-shadow: 0 0 10px rgba(255, 0, 64, 0.3);
+        }
+
+        .url-link {
+            color: var(--text);
+            text-decoration: none;
+            word-break: break-all;
+        }
+
+        .url-link:hover {
+            color: var(--primary);
+            text-shadow: 0 0 5px var(--primary);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+        }
+
+        .alert {
+            padding: 20px;
+            border: 2px solid;
+            margin: 20px 0;
+        }
+
+        .alert-success {
+            border-color: var(--success);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .alert-error {
+            border-color: var(--error);
+            background: rgba(255, 0, 64, 0.1);
+        }
+
+        .alert strong::before {
+            content: '[!] ';
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px;
+            margin-top: 60px;
+            border-top: 2px solid var(--border);
+            font-family: 'Orbitron', monospace;
+        }
+
+        .footer .author {
+            font-size: 1.3em;
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .footer .credits {
+            font-size: 0.9em;
+            opacity: 0.7;
+            letter-spacing: 2px;
+        }
+
+        .glitch {
+            animation: glitch 1s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+        }
+
+        .seo-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .option-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--border);
+            padding: 20px;
+        }
+
+        .option-card h4 {
+            font-family: 'Orbitron', monospace;
+            margin-bottom: 15px;
+            font-size: 1em;
+        }
+
+        .option-card p {
+            font-size: 12px;
+            opacity: 0.8;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.8em; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .tabs { flex-direction: column; }
+            .seo-options { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-bg"></canvas>
+
+    <div class="container">
+        <div class="header">
+            <div class="lang-switch">
+                <button class="lang-btn active" data-lang="en">EN</button>
+                <button class="lang-btn" data-lang="ru">RU</button>
+            </div>
+            <h1 class="glitch">SITEMAP ANALYZER</h1>
+            <div class="subtitle" data-i18n="subtitle">PROFESSIONAL SEO AUDIT SYSTEM</div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="analyze" data-i18n="tab-analyze">ANALYZE</button>
+            <button class="tab" data-tab="generate" data-i18n="tab-generate">GENERATE</button>
+        </div>
+
+        <!-- АНАЛИЗ -->
+        <div id="analyze" class="tab-content active">
+            <div class="input-section">
+                <h3 data-i18n="input-data">INPUT DATA</h3>
+                
+                <div class="input-group">
+                    <label data-i18n="sitemap-url">SITEMAP URL OR XML CONTENT</label>
+                    <textarea id="sitemapInput" placeholder="https://example.com/sitemap.xml
+
+or paste XML content directly..."></textarea>
+                </div>
+
+                <button class="btn btn-primary" id="analyzeBtn">
+                    <span style="position: relative; z-index: 1;" data-i18n="btn-analyze">INITIATE ANALYSIS</span>
+                </button>
+            </div>
+
+            <div class="console-output" id="console" style="display: none;"></div>
+
+            <div class="loading" id="analyzeLoading">
+                <div class="spinner"></div>
+                <p data-i18n="processing">PROCESSING DATA...</p>
+            </div>
+
+            <div class="results" id="analyzeResults"></div>
+        </div>
+
+        <!-- ГЕНЕРАЦИЯ -->
+        <div id="generate" class="tab-content">
+            <div class="input-section">
+                <h3 data-i18n="sitemap-generator">SITEMAP GENERATOR</h3>
+                
+                <div class="input-group">
+                    <label data-i18n="url-list">URL LIST (ONE PER LINE)</label>
+                    <textarea id="urlList" placeholder="https://example.com/
+https://example.com/about/
+https://example.com/services/"></textarea>
+                </div>
+
+                <div class="seo-options">
+                    <div class="option-card">
+                        <h4 data-i18n="priority-mode">PRIORITY CALCULATION</h4>
+                        <p data-i18n="priority-desc">Smart priority based on URL depth and page type</p>
+                        <select id="priorityMode">
+                            <option value="auto">AUTO (Smart SEO)</option>
+                            <option value="depth">By Depth (Homepage=1.0)</option>
+                            <option value="equal">Equal for All</option>
+                            <option value="custom">Custom Value</option>
+                        </select>
+                        <div id="customPriorityInput" style="display:none;margin-top:10px;">
+                            <input type="number" id="customPriority" min="0" max="1" step="0.1" value="0.5" placeholder="0.0 - 1.0">
+                        </div>
+                    </div>
+
+                    <div class="option-card">
+                        <h4 data-i18n="changefreq-mode">UPDATE FREQUENCY</h4>
+                        <p data-i18n="changefreq-desc">How often content updates</p>
+                        <select id="changefreqMode">
+                            <option value="auto">AUTO (Page Type Based)</option>
+                            <option value="always">Always</option>
+                            <option value="hourly">Hourly</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                            <option value="never">Never</option>
+                        </select>
+                    </div>
+
+                    <div class="option-card">
+                        <h4>SEO BOOST</h4>
+                        <p>Boost priority for important pages</p>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="boostImportant" checked>
+                            <label>Boost /about, /contact, /services</label>
+                        </div>
+                    </div>
+
+                    <div class="option-card">
+                        <h4>URL OPTIMIZATION</h4>
+                        <p>Clean and optimize URLs</p>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="removeTrailingSlash">
+                            <label>Remove trailing slash</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="lowercaseUrls">
+                            <label>Convert to lowercase</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="addLastmod" checked>
+                    <label data-i18n="add-lastmod">ADD LASTMOD (CURRENT DATE)</label>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="sortUrls" checked>
+                    <label data-i18n="sort-urls">SORT BY PRIORITY (HIGH TO LOW)</label>
+                </div>
+
+                <button class="btn btn-primary" id="generateBtn">
+                    <span style="position: relative; z-index: 1;" data-i18n="btn-generate">GENERATE SITEMAP</span>
+                </button>
+            </div>
+
+            <div class="results" id="generateResults"></div>
+        </div>
+
+        <div class="footer">
+            <div class="author">DEVELOPED BY GARBUZ ALEXANDER</div>
+            <div class="credits">SEO SPECIALIST | WEB DEVELOPER</div>
+        </div>
+    </div>
+
+    <script>
+        // Translations
+        const translations = {
+            en: {
+                'subtitle': 'PROFESSIONAL SEO AUDIT SYSTEM',
+                'tab-analyze': 'ANALYZE',
+                'tab-generate': 'GENERATE',
+                'input-data': 'INPUT DATA',
+                'sitemap-url': 'SITEMAP URL OR XML CONTENT',
+                'btn-analyze': 'INITIATE ANALYSIS',
+                'processing': 'PROCESSING DATA...',
+                'sitemap-generator': 'SITEMAP GENERATOR',
+                'url-list': 'URL LIST (ONE PER LINE)',
+                'priority-mode': 'PRIORITY CALCULATION',
+                'priority-desc': 'Smart priority based on URL depth and page type',
+                'changefreq-mode': 'UPDATE FREQUENCY',
+                'changefreq-desc': 'How often content updates',
+                'add-lastmod': 'ADD LASTMOD (CURRENT DATE)',
+                'sort-urls': 'SORT BY PRIORITY (HIGH TO LOW)',
+                'btn-generate': 'GENERATE SITEMAP',
+                'download-html': 'DOWNLOAD HTML REPORT',
+                'download-xml': 'DOWNLOAD XML',
+                'copy-clipboard': 'COPY TO CLIPBOARD',
+                'analysis-complete': 'ANALYSIS COMPLETE',
+                'no-errors': 'NO CRITICAL ERRORS FOUND',
+                'errors-detected': 'ERRORS DETECTED',
+                'issues-found': 'ISSUES FOUND',
+                'generation-complete': 'GENERATION COMPLETE',
+                'sitemap-created': 'SITEMAP CREATED WITH',
+                'xml-visualization': 'SITEMAP XML STRUCTURE',
+                'url-database': 'URL DATABASE',
+                'total-records': 'TOTAL RECORDS'
+            },
+            ru: {
+                'subtitle': 'ПРОФЕССИОНАЛЬНАЯ СИСТЕМА SEO АУДИТА',
+                'tab-analyze': 'АНАЛИЗ',
+                'tab-generate': 'ГЕНЕРАЦИЯ',
+                'input-data': 'ВХОДНЫЕ ДАННЫЕ',
+                'sitemap-url': 'URL SITEMAP ИЛИ XML СОДЕРЖИМОЕ',
+                'btn-analyze': 'НАЧАТЬ АНАЛИЗ',
+                'processing': 'ОБРАБОТКА ДАННЫХ...',
+                'sitemap-generator': 'ГЕНЕРАТОР SITEMAP',
+                'url-list': 'СПИСОК URL (ПО ОДНОМУ НА СТРОКУ)',
+                'priority-mode': 'РАСЧЕТ ПРИОРИТЕТОВ',
+                'priority-desc': 'Умный приоритет на основе глубины URL и типа страницы',
+                'changefreq-mode': 'ЧАСТОТА ОБНОВЛЕНИЙ',
+                'changefreq-desc': 'Как часто обновляется контент',
+                'add-lastmod': 'ДОБАВИТЬ LASTMOD (ТЕКУЩАЯ ДАТА)',
+                'sort-urls': 'СОРТИРОВАТЬ ПО ПРИОРИТЕТУ (ОТ ВЫСОКОГО К НИЗКОМУ)',
+                'btn-generate': 'СГЕНЕРИРОВАТЬ SITEMAP',
+                'download-html': 'СКАЧАТЬ HTML ОТЧЕТ',
+                'download-xml': 'СКАЧАТЬ XML',
+                'copy-clipboard': 'КОПИРОВАТЬ В БУФЕР',
+                'analysis-complete': 'АНАЛИЗ ЗАВЕРШЕН',
+                'no-errors': 'КРИТИЧЕСКИХ ОШИБОК НЕ НАЙДЕНО',
+                'errors-detected': 'ОБНАРУЖЕНЫ ОШИБКИ',
+                'issues-found': 'НАЙДЕНО ПРОБЛЕМ',
+                'generation-complete': 'ГЕНЕРАЦИЯ ЗАВЕРШЕНА',
+                'sitemap-created': 'SITEMAP СОЗДАН С',
+                'xml-visualization': 'XML СТРУКТУРА SITEMAP',
+                'url-database': 'БАЗА ДАННЫХ URL',
+                'total-records': 'ВСЕГО ЗАПИСЕЙ'
+            }
+        };
+
+        let currentLang = 'en';
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+        }
+
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                setLanguage(this.dataset.lang);
+            });
+        });
+
+        // Show/hide custom priority input
+        document.getElementById('priorityMode').addEventListener('change', function() {
+            document.getElementById('customPriorityInput').style.display = 
+                this.value === 'custom' ? 'block' : 'none';
+        });
+
+        // Matrix Background
+        const canvas = document.getElementById('matrix-bg');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const characters = '01';
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(10, 10, 10, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = characters[Math.floor(Math.random() * characters.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 50);
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Tab Switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById(this.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Console Logger
+        function log(message, type = 'info') {
+            const consoleEl = document.getElementById('console');
+            consoleEl.style.display = 'block';
+            const line = document.createElement('div');
+            line.className = `console-line ${type}`;
+            line.textContent = message;
+            consoleEl.appendChild(line);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('console').innerHTML = '';
+        }
+
+        // Enhanced fetch methods for WordPress/Yoast and ANY sitemap
+        async function fetchSitemapWithMultipleMethods(url) {
+            log('INITIATING ADVANCED FETCH PROTOCOL...', 'success');
+            
+            const methods = [
+                {
+                    name: 'DIRECT-HTTPS',
+                    fetch: () => fetch(url, {
+                        method: 'GET',
+                        mode: 'cors',
+                        headers: {
+                            'Accept': 'application/xml, text/xml, */*',
+                            'User-Agent': 'Mozilla/5.0 (compatible; SitemapAnalyzer/2.0)'
+                        }
+                    })
+                },
+                {
+                    name: 'CORS-ANYWHERE',
+                    fetch: () => fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`)
+                },
+                {
+                    name: 'PROXY-CODETABS',
+                    fetch: () => fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`)
+                },
+                {
+                    name: 'THINGPROXY',
+                    fetch: () => fetch(`https://thingproxy.freeboard.io/fetch/${url}`)
+                },
+                {
+                    name: 'DIRECT-HTTP (No CORS)',
+                    fetch: () => fetch(url.replace('https://', 'http://'), { mode: 'no-cors' }).then(() => fetch(url))
+                }
+            ];
+
+            // Try common WordPress sitemap variations
+            const wpVariations = [
+                url,
+                url.replace(/sitemap.*\.xml$/i, 'sitemap.xml'),
+                url.replace(/sitemap.*\.xml$/i, 'sitemap_index.xml'),
+                url.replace(/sitemap.*\.xml$/i, 'wp-sitemap.xml'),
+                url.replace(/\/[^\/]*sitemap[^\/]*\.xml$/i, '/sitemap.xml'),
+                url.replace(/\/[^\/]*sitemap[^\/]*\.xml$/i, '/sitemap_index.xml'),
+                url.replace(/\/[^\/]*sitemap[^\/]*\.xml$/i, '/wp-sitemap.xml')
+            ];
+
+            const uniqueVariations = [...new Set(wpVariations)];
+
+            for (const variation of uniqueVariations) {
+                log(`TESTING VARIATION: ${variation.split('/').pop()}`);
+                
+                for (const method of methods) {
+                    try {
+                        log(`  → METHOD: ${method.name}...`);
+                        
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 15000);
+                        
+                        const response = await Promise.race([
+                            method.fetch().then(r => {
+                                clearTimeout(timeoutId);
+                                return r;
+                            }),
+                            new Promise((_, reject) => 
+                                setTimeout(() => reject(new Error('TIMEOUT')), 15000)
+                            )
+                        ]);
+                        
+                        if (response.ok || response.type === 'opaque') {
+                            const content = await response.text();
+                            
+                            // Validate XML content
+                            if (content && (content.includes('<?xml') || content.includes('<urlset') || content.includes('<sitemapindex'))) {
+                                log(`  ✓ SUCCESS: ${method.name} WORKED!`, 'success');
+                                return content;
+                            } else {
+                                log(`  ✗ INVALID XML CONTENT`, 'warning');
+                            }
+                        }
+                    } catch (e) {
+                        if (e.message !== 'TIMEOUT') {
+                            log(`  ✗ FAILED: ${e.message}`, 'error');
+                        } else {
+                            log(`  ✗ TIMEOUT`, 'warning');
+                        }
+                    }
+                }
+            }
+
+            throw new Error('ALL FETCH METHODS FAILED. PASTE XML DIRECTLY OR CHECK URL');
+        }
+
+        // Analyze Sitemap
+        document.getElementById('analyzeBtn').addEventListener('click', async function() {
+            const input = document.getElementById('sitemapInput').value.trim();
+            const loading = document.getElementById('analyzeLoading');
+            const results = document.getElementById('analyzeResults');
+            
+            if (!input) {
+                alert('⚠️ ERROR: INPUT REQUIRED');
+                return;
+            }
+
+            this.disabled = true;
+            loading.classList.add('show');
+            results.classList.remove('show');
+            clearConsole();
+
+            log('═══════════════════════════════════', 'success');
+            log('SITEMAP ANALYZER SYSTEM ONLINE', 'success');
+            log('═══════════════════════════════════', 'success');
+
+            try {
+                let xmlContent;
+                
+                if (input.startsWith('http')) {
+                    log('INPUT TYPE: URL DETECTED');
+                    log('TARGET: ' + input);
+                    log('');
+                    
+                    xmlContent = await fetchSitemapWithMultipleMethods(input);
+                    
+                } else {
+                    xmlContent = input;
+                    log('INPUT TYPE: XML CONTENT (PASTED)', 'success');
+                }
+
+                log('');
+                log('VALIDATING XML STRUCTURE...');
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlContent, 'text/xml');
+
+                if (xmlDoc.querySelector('parsererror')) {
+                    throw new Error('INVALID XML FORMAT - SYNTAX ERROR DETECTED');
+                }
+
+                log('✓ XML VALIDATED', 'success');
+                log('');
+                log('ANALYZING SITEMAP DATA...');
+
+                const analysis = analyzeXML(xmlDoc, xmlContent);
+                
+                log('');
+                log('═══════ ANALYSIS RESULTS ═══════', 'success');
+                log(`TOTAL URLS: ${analysis.totalUrls}`, 'success');
+                log(`WITH PRIORITY: ${analysis.stats.withPriority}`, 'success');
+                log(`WITH LASTMOD: ${analysis.stats.withLastmod}`, 'success');
+                log(`WITH CHANGEFREQ: ${analysis.stats.withChangefreq}`, 'success');
+                log(`FILE SIZE: ${analysis.sizeKB} KB`, 'success');
+                log('═══════════════════════════════════', 'success');
+                log('');
+                log('✓ ANALYSIS COMPLETE', 'success');
+
+                displayAnalysisResults(analysis, xmlContent);
+
+            } catch (error) {
+                log('');
+                log('✗ FATAL ERROR: ' + error.message, 'error');
+                results.innerHTML = `<div class="alert alert-error"><strong>ERROR</strong><br>${error.message}</div>`;
+                results.classList.add('show');
+            } finally {
+                loading.classList.remove('show');
+                this.disabled = false;
+            }
+        });
+
+        // Generate Sitemap with FLEXIBLE SEO options
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            const urlList = document.getElementById('urlList').value.trim();
+            
+            if (!urlList) {
+                alert('⚠️ ERROR: URL LIST REQUIRED');
+                return;
+            }
+
+            clearConsole();
+            log('═══════════════════════════════════', 'success');
+            log('SITEMAP GENERATOR INITIATED', 'success');
+            log('═══════════════════════════════════', 'success');
+
+            let urls = urlList.split('\n').filter(u => u.trim());
+            const originalCount = urls.length;
+            urls = [...new Set(urls)]; // Remove duplicates
+            
+            log(`INPUT: ${originalCount} URLs`);
+            if (originalCount !== urls.length) {
+                log(`REMOVED: ${originalCount - urls.length} duplicates`, 'warning');
+            }
+            log(`PROCESSING: ${urls.length} unique URLs`);
+            log('');
+
+            const priorityMode = document.getElementById('priorityMode').value;
+            const changefreqMode = document.getElementById('changefreqMode').value;
+            const addLastmod = document.getElementById('addLastmod').checked;
+            const sortUrls = document.getElementById('sortUrls').checked;
+            const boostImportant = document.getElementById('boostImportant').checked;
+            const removeTrailingSlash = document.getElementById('removeTrailingSlash').checked;
+            const lowercaseUrls = document.getElementById('lowercaseUrls').checked;
+            const customPriority = document.getElementById('customPriority').value;
+
+            log('CONFIGURATION:');
+            log(`  Priority Mode: ${priorityMode.toUpperCase()}`);
+            log(`  Changefreq Mode: ${changefreqMode.toUpperCase()}`);
+            log(`  SEO Boost: ${boostImportant ? 'ENABLED' : 'DISABLED'}`);
+            log(`  Lastmod: ${addLastmod ? 'ENABLED' : 'DISABLED'}`);
+            log('');
+
+            const urlData = urls.map(url => {
+                try {
+                    let cleanUrl = url.trim();
+                    
+                    // URL optimization
+                    if (lowercaseUrls) {
+                        cleanUrl = cleanUrl.toLowerCase();
+                    }
+                    
+                    const urlObj = new URL(cleanUrl);
+                    const path = urlObj.pathname;
+                    const depth = path.split('/').filter(p => p).length;
+
+                    if (removeTrailingSlash && cleanUrl.endsWith('/') && path !== '/') {
+                        cleanUrl = cleanUrl.slice(0, -1);
+                    }
+
+                    let priority;
+                    
+                    // FLEXIBLE PRIORITY CALCULATION
+                    switch(priorityMode) {
+                        case 'auto':
+                            // Smart SEO-optimized priority
+                            if (path === '/' || path === '') {
+                                priority = '1.0';
+                            } else if (depth === 1) {
+                                priority = '0.8';
+                            } else if (depth === 2) {
+                                priority = '0.6';
+                            } else if (depth === 3) {
+                                priority = '0.5';
+                            } else {
+                                priority = '0.4';
+                            }
+
+                            // SEO boost for strategic pages
+                            if (boostImportant) {
+                                const important = ['about', 'contact', 'services', 'products', 'portfolio', 'shop', 'store'];
+                                const lowerPath = path.toLowerCase();
+                                if (important.some(p => lowerPath.includes(p)) && depth <= 1) {
+                                    priority = '0.9';
+                                }
+                            }
+                            break;
+                            
+                        case 'depth':
+                            // Simple depth-based priority
+                            if (path === '/' || path === '') priority = '1.0';
+                            else if (depth === 1) priority = '0.8';
+                            else if (depth === 2) priority = '0.6';
+                            else if (depth === 3) priority = '0.5';
+                            else priority = '0.4';
+                            break;
+                            
+                        case 'equal':
+                            // Equal priority for all
+                            priority = '0.5';
+                            break;
+                            
+                        case 'custom':
+                            // User-defined priority
+                            priority = parseFloat(customPriority).toFixed(1);
+                            break;
+                    }
+
+                    let changefreq;
+                    
+                    // FLEXIBLE CHANGEFREQ CALCULATION
+                    if (changefreqMode === 'auto') {
+                        const lowerPath = path.toLowerCase();
+                        
+                        // Homepage - most frequent
+                        if (path === '/' || path === '') {
+                            changefreq = 'daily';
+                        }
+                        // News/Blog - regular updates
+                        else if (lowerPath.includes('blog') || lowerPath.includes('news') || lowerPath.includes('article')) {
+                            changefreq = 'weekly';
+                        }
+                        // E-commerce - moderate updates
+                        else if (lowerPath.includes('product') || lowerPath.includes('shop') || lowerPath.includes('store')) {
+                            changefreq = 'weekly';
+                        }
+                        // Services - occasional updates
+                        else if (lowerPath.includes('service')) {
+                            changefreq = 'monthly';
+                        }
+                        // Deep pages - infrequent updates
+                        else if (depth >= 3) {
+                            changefreq = 'yearly';
+                        }
+                        // Standard pages
+                        else {
+                            changefreq = 'monthly';
+                        }
+                    } else {
+                        changefreq = changefreqMode;
+                    }
+
+                    return {
+                        url: cleanUrl,
+                        priority: priority,
+                        changefreq: changefreq,
+                        lastmod: addLastmod ? new Date().toISOString().split('T')[0] : null,
+                        priorityNum: parseFloat(priority),
+                        valid: true
+                    };
+                } catch (e) {
+                    log(`✗ INVALID URL: ${url}`, 'error');
+                    return { url: url, valid: false };
+                }
+            });
+
+            const validUrls = urlData.filter(u => u.valid);
+            log(`VALIDATED: ${validUrls.length} URLs`, 'success');
+
+            if (sortUrls) {
+                validUrls.sort((a, b) => b.priorityNum - a.priorityNum);
+                log('SORTED: By priority (HIGH → LOW)', 'success');
+            }
+
+            // Generate XML
+            let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+            xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+
+            validUrls.forEach(item => {
+                xml += '  <url>\n';
+                xml += `    <loc>${escapeXml(item.url)}</loc>\n`;
+                if (item.lastmod) {
+                    xml += `    <lastmod>${item.lastmod}</lastmod>\n`;
+                }
+                xml += `    <changefreq>${item.changefreq}</changefreq>\n`;
+                xml += `    <priority>${item.priority}</priority>\n`;
+                xml += '  </url>\n';
+            });
+
+            xml += '</urlset>';
+
+            window.generatedXml = xml;
+            window.generatedUrls = validUrls;
+            
+            log('');
+            log('═══════ GENERATION RESULTS ═══════', 'success');
+            log(`FILE SIZE: ${(new Blob([xml]).size / 1024).toFixed(2)} KB`, 'success');
+            log(`HIGH PRIORITY (≥0.8): ${validUrls.filter(u => u.priorityNum >= 0.8).length}`, 'success');
+            log(`MEDIUM PRIORITY (0.5-0.7): ${validUrls.filter(u => u.priorityNum >= 0.5 && u.priorityNum < 0.8).length}`, 'success');
+            log('═══════════════════════════════════', 'success');
+            log('');
+            log('✓ SITEMAP GENERATED SUCCESSFULLY', 'success');
+            
+            displayGenerationResults(validUrls, xml);
+        });
+
+        function analyzeXML(xmlDoc, xmlContent) {
+            const urls = xmlDoc.querySelectorAll('url');
+            const analysis = {
+                totalUrls: urls.length,
+                urlDetails: [],
+                stats: {
+                    withPriority: 0,
+                    withLastmod: 0,
+                    withChangefreq: 0,
+                    duplicates: 0,
+                    highPriority: 0,
+                    mediumPriority: 0,
+                    lowPriority: 0
+                },
+                errors: [],
+                warnings: []
+            };
+
+            const urlSet = new Set();
+
+            urls.forEach((url, index) => {
+                const loc = url.querySelector('loc')?.textContent?.trim();
+                
+                if (!loc) {
+                    analysis.errors.push(`URL #${index + 1}: MISSING <loc> TAG`);
+                    return;
+                }
+
+                if (urlSet.has(loc)) {
+                    analysis.stats.duplicates++;
+                    analysis.errors.push(`DUPLICATE URL: ${loc}`);
+                } else {
+                    urlSet.add(loc);
+                }
+
+                const priority = url.querySelector('priority')?.textContent?.trim();
+                const lastmod = url.querySelector('lastmod')?.textContent?.trim();
+                const changefreq = url.querySelector('changefreq')?.textContent?.trim();
+
+                if (priority) {
+                    analysis.stats.withPriority++;
+                    const p = parseFloat(priority);
+                    if (p >= 0.8) analysis.stats.highPriority++;
+                    else if (p >= 0.5) analysis.stats.mediumPriority++;
+                    else analysis.stats.lowPriority++;
+
+                    if (p < 0 || p > 1) {
+                        analysis.errors.push(`INVALID PRIORITY VALUE: ${priority} (must be 0.0-1.0)`);
+                    }
+                }
+
+                if (lastmod) analysis.stats.withLastmod++;
+                if (changefreq) analysis.stats.withChangefreq++;
+
+                analysis.urlDetails.push({
+                    index: index + 1,
+                    loc: loc,
+                    priority: priority || 'N/A',
+                    lastmod: lastmod || 'N/A',
+                    changefreq: changefreq || 'N/A',
+                    priorityNum: priority ? parseFloat(priority) : 0
+                });
+            });
+
+            analysis.sizeKB = (new Blob([xmlContent]).size / 1024).toFixed(2);
+            
+            // SEO Warnings
+            if (analysis.totalUrls > 50000) {
+                analysis.errors.push('⚠️ EXCEEDS 50,000 URL LIMIT - Split into multiple sitemaps');
+            }
+
+            const priorityPercent = Math.round((analysis.stats.withPriority / analysis.totalUrls) * 100);
+            if (priorityPercent < 80) {
+                analysis.warnings.push(`Only ${priorityPercent}% URLs have priority tags - Recommended: 100%`);
+            }
+
+            const lastmodPercent = Math.round((analysis.stats.withLastmod / analysis.totalUrls) * 100);
+            if (lastmodPercent < 80) {
+                analysis.warnings.push(`Only ${lastmodPercent}% URLs have lastmod tags - Helps search engines`);
+            }
+
+            return analysis;
+        }
+
+        function displayAnalysisResults(analysis, xmlContent) {
+            const results = document.getElementById('analyzeResults');
+            const t = translations[currentLang];
+            
+            let html = '';
+
+            // Alert
+            if (analysis.errors.length === 0) {
+                html += `<div class="alert alert-success"><strong>${t['analysis-complete']}</strong><br>${t['no-errors']}</div>`;
+            } else {
+                html += `<div class="alert alert-error"><strong>${t['errors-detected']}</strong><br>${analysis.errors.length} ${t['issues-found']}</div>`;
+            }
+
+            // Buttons
+            html += '<div style="margin: 20px 0;">';
+            html += `<button class="btn" onclick="downloadHTMLReport()"><span style="position: relative; z-index: 1;">${t['download-html']}</span></button>`;
+            html += `<button class="btn" onclick="downloadOriginalXML()"><span style="position: relative; z-index: 1;">${t['download-xml']}</span></button>`;
+            html += '</div>';
+
+            // Stats
+            html += '<div class="stats-grid">';
+            html += `<div class="stat-card"><h3>TOTAL URLS</h3><div class="value">${analysis.totalUrls}</div></div>`;
+            html += `<div class="stat-card ${analysis.errors.length > 0 ? 'error' : ''}"><h3>ERRORS</h3><div class="value">${analysis.errors.length}</div></div>`;
+            html += `<div class="stat-card ${analysis.warnings.length > 0 ? 'warning' : ''}"><h3>WARNINGS</h3><div class="value">${analysis.warnings.length}</div></div>`;
+            html += `<div class="stat-card"><h3>WITH PRIORITY</h3><div class="value">${analysis.stats.withPriority}</div></div>`;
+            html += `<div class="stat-card"><h3>WITH LASTMOD</h3><div class="value">${analysis.stats.withLastmod}</div></div>`;
+            html += `<div class="stat-card"><h3>WITH CHANGEFREQ</h3><div class="value">${analysis.stats.withChangefreq}</div></div>`;
+            html += `<div class="stat-card"><h3>FILE SIZE</h3><div class="value">${analysis.sizeKB}<small style="font-size:14px;">KB</small></div></div>`;
+            html += `<div class="stat-card"><h3>HIGH PRIORITY</h3><div class="value">${analysis.stats.highPriority}</div></div>`;
+            html += '</div>';
+
+            // Errors
+            if (analysis.errors.length > 0) {
+                html += '<div class="section">';
+                html += '<h3>ERROR LOG</h3>';
+                analysis.errors.forEach(err => {
+                    html += `<div class="info-block" style="border-left-color: var(--error);"><p>${err}</p></div>`;
+                });
+                html += '</div>';
+            }
+
+            // Warnings
+            if (analysis.warnings.length > 0) {
+                html += '<div class="section">';
+                html += '<h3>WARNING LOG</h3>';
+                analysis.warnings.forEach(warn => {
+                    html += `<div class="info-block" style="border-left-color: var(--warning);"><p>${warn}</p></div>`;
+                });
+                html += '</div>';
+            }
+
+            // XML Structure (proper formatting)
+            html += '<div class="section">';
+            html += `<h3>${t['xml-visualization']}</h3>`;
+            html += '<div class="xml-output">' + escapeHtml(xmlContent) + '</div>';
+            html += '</div>';
+
+            // URL Table
+            html += '<div class="section">';
+            html += `<h3>${t['url-database']}</h3>`;
+            
+            html += '<table class="data-table">';
+            html += '<thead><tr><th>ID</th><th>URL</th><th>PRIORITY</th><th>CHANGEFREQ</th><th>LASTMOD</th></tr></thead>';
+            html += '<tbody>';
+            
+            analysis.urlDetails.forEach((url) => {
+                let badge = 'N/A';
+                if (url.priority !== 'N/A') {
+                    const p = parseFloat(url.priority);
+                    const cls = p >= 0.8 ? 'high' : p >= 0.5 ? 'medium' : 'low';
+                    badge = `<span class="priority-badge priority-${cls}">${url.priority}</span>`;
+                }
+
+                html += `<tr>
+                    <td>${String(url.index).padStart(4, '0')}</td>
+                    <td><a href="${url.loc}" class="url-link" target="_blank">${url.loc}</a></td>
+                    <td>${badge}</td>
+                    <td>${url.changefreq}</td>
+                    <td>${url.lastmod}</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            html += `<p style="text-align:center;margin-top:20px;opacity:0.7;">${t['total-records']}: ${analysis.urlDetails.length}</p>`;
+            html += '</div>';
+
+            window.currentAnalysis = analysis;
+            window.currentXmlContent = xmlContent;
+
+            results.innerHTML = html;
+            results.classList.add('show');
+        }
+
+        function displayGenerationResults(validUrls, xml) {
+            const results = document.getElementById('generateResults');
+            const t = translations[currentLang];
+            
+            let html = `<div class="alert alert-success"><strong>${t['generation-complete']}</strong><br>${t['sitemap-created']} ${validUrls.length} URLS</div>`;
+
+            html += '<div style="margin: 20px 0;">';
+            html += `<button class="btn" onclick="downloadGeneratedHTML()"><span style="position: relative; z-index: 1;">${t['download-html']}</span></button>`;
+            html += `<button class="btn" onclick="downloadGeneratedXML()"><span style="position: relative; z-index: 1;">${t['download-xml']}</span></button>`;
+            html += `<button class="btn" onclick="copyGeneratedXML()"><span style="position: relative; z-index: 1;">${t['copy-clipboard']}</span></button>`;
+            html += '</div>';
+
+            html += '<div class="stats-grid">';
+            html += `<div class="stat-card"><h3>VALID URLS</h3><div class="value">${validUrls.length}</div></div>`;
+            html += `<div class="stat-card"><h3>FILE SIZE</h3><div class="value">${(new Blob([xml]).size / 1024).toFixed(2)}<small style="font-size:14px;">KB</small></div></div>`;
+            html += `<div class="stat-card"><h3>HIGH PRIORITY</h3><div class="value">${validUrls.filter(u => parseFloat(u.priority) >= 0.8).length}</div></div>`;
+            html += '</div>';
+
+            html += '<div class="section">';
+            html += '<h3>GENERATED XML</h3>';
+            html += '<div class="xml-output">' + escapeHtml(xml) + '</div>';
+            html += '</div>';
+
+            html += '<div class="section">';
+            html += `<h3>${t['url-database']}</h3>`;
+            html += '<table class="data-table">';
+            html += '<thead><tr><th>ID</th><th>URL</th><th>PRIORITY</th><th>CHANGEFREQ</th><th>LASTMOD</th></tr></thead>';
+            html += '<tbody>';
+            
+            validUrls.forEach((url, i) => {
+                const p = parseFloat(url.priority);
+                const cls = p >= 0.8 ? 'high' : p >= 0.5 ? 'medium' : 'low';
+                
+                html += `<tr>
+                    <td>${String(i + 1).padStart(4, '0')}</td>
+                    <td><a href="${url.url}" class="url-link" target="_blank">${url.url}</a></td>
+                    <td><span class="priority-badge priority-${cls}">${url.priority}</span></td>
+                    <td>${url.changefreq}</td>
+                    <td>${url.lastmod || 'N/A'}</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            html += '</div>';
+
+            results.innerHTML = html;
+            results.classList.add('show');
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function downloadHTMLReport() {
+            const analysis = window.currentAnalysis;
+            if (!analysis) return;
+            
+            let html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Sitemap Analysis Report</title>
+<style>body{font-family:Arial;margin:40px;background:#f5f5f5}.container{max-width:1200px;margin:0 auto;background:#fff;padding:40px}h1{color:#2c3e50;border-bottom:3px solid #3498db;padding-bottom:10px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin:30px 0}.stat-box{background:#ecf0f1;padding:20px;text-align:center;border-radius:8px}.stat-box .value{font-size:36px;font-weight:bold;color:#2c3e50}table{width:100%;border-collapse:collapse;margin:20px 0}th{background:#34495e;color:#fff;padding:12px;text-align:left}td{padding:10px;border-bottom:1px solid #ddd}tr:hover{background:#f5f5f5}</style></head><body>
+<div class="container"><h1>📊 SITEMAP ANALYSIS REPORT</h1><p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+<div class="stats"><div class="stat-box"><h3>Total URLs</h3><div class="value">${analysis.totalUrls}</div></div>
+<div class="stat-box"><h3>With Priority</h3><div class="value">${analysis.stats.withPriority}</div></div>
+<div class="stat-box"><h3>With Lastmod</h3><div class="value">${analysis.stats.withLastmod}</div></div>
+<div class="stat-box"><h3>Size</h3><div class="value">${analysis.sizeKB} KB</div></div></div>
+<h2>📋 Complete URL List</h2><table><thead><tr><th>#</th><th>URL</th><th>Priority</th><th>Changefreq</th><th>Lastmod</th></tr></thead><tbody>`;
+
+            analysis.urlDetails.forEach(url => {
+                html += `<tr><td>${url.index}</td><td>${url.loc}</td><td>${url.priority}</td><td>${url.changefreq}</td><td>${url.lastmod}</td></tr>`;
+            });
+
+            html += `</tbody></table><div style="margin-top:40px;padding:20px;background:#e8f4f8;border-left:4px solid #3498db"><h3>Report Generated By</h3><p><strong>GARBUZ ALEXANDER</strong> - SEO Specialist / Web Developer</p></div></div></body></html>`;
+
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sitemap-analysis-report.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadGeneratedHTML() {
+            const validUrls = window.generatedUrls;
+            if (!validUrls) return;
+            
+            let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Generated Sitemap Report</title>
+<style>body{font-family:Arial;margin:40px;background:#f5f5f5}.container{max-width:1200px;margin:0 auto;background:#fff;padding:40px}h1{color:#2c3e50;border-bottom:3px solid #3498db;padding-bottom:10px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:30px 0}.stat-box{background:#ecf0f1;padding:20px;text-align:center;border-radius:8px}.stat-box .value{font-size:36px;font-weight:bold;color:#2c3e50}table{width:100%;border-collapse:collapse;margin:20px 0}th{background:#34495e;color:#fff;padding:12px;text-align:left}td{padding:10px;border-bottom:1px solid #ddd}tr:hover{background:#f5f5f5}</style></head><body>
+<div class="container"><h1>📊 GENERATED SITEMAP REPORT</h1><p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+<div class="stats"><div class="stat-box"><h3>Valid URLs</h3><div class="value">${validUrls.length}</div></div>
+<div class="stat-box"><h3>High Priority</h3><div class="value">${validUrls.filter(u => parseFloat(u.priority) >= 0.8).length}</div></div>
+<div class="stat-box"><h3>File Size</h3><div class="value">${(new Blob([window.generatedXml]).size / 1024).toFixed(2)} KB</div></div></div>
+<h2>📋 Complete URL List</h2><table><thead><tr><th>#</th><th>URL</th><th>Priority</th><th>Changefreq</th><th>Lastmod</th></tr></thead><tbody>`;
+
+            validUrls.forEach((url, i) => {
+                html += `<tr><td>${i+1}</td><td>${url.url}</td><td>${url.priority}</td><td>${url.changefreq}</td><td>${url.lastmod || 'N/A'}</td></tr>`;
+            });
+
+            html += `</tbody></table><div style="margin-top:40px;padding:20px;background:#e8f4f8;border-left:4px solid #3498db"><h3>Report Generated By</h3><p><strong>GARBUZ ALEXANDER</strong> - SEO Specialist / Web Developer</p></div></div></body></html>`;
+
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'generated-sitemap-report.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadOriginalXML() {
+            if (!window.currentXmlContent) return;
+            const blob = new Blob([window.currentXmlContent], { type: 'application/xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sitemap.xml';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadGeneratedXML() {
+            if (!window.generatedXml) return;
+            const blob = new Blob([window.generatedXml], { type: 'application/xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sitemap.xml';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function copyGeneratedXML() {
+            if (!window.generatedXml) return;
+            navigator.clipboard.writeText(window.generatedXml).then(() => {
+                alert('✅ XML COPIED TO CLIPBOARD');
+            });
+        }
+
+        function escapeXml(str) {
+            return String(str).replace(/[<>&'"]/g, c => {
+                switch (c) {
+                    case '<': return '&lt;';
+                    case '>': return '&gt;';
+                    case '&': return '&amp;';
+                    case "'": return '&apos;';
+                    case '"': return '&quot;';
+                }
+            });
+        }
+
+        console.log('%c╔═══════════════════════════════════╗', 'color: #ffffff; font-weight: bold;');
+        console.log('%c║  SITEMAP ANALYZER PRO v2.0        ║', 'color: #ffffff; font-weight: bold;');
+        console.log('%c║  By: GARBUZ ALEXANDER             ║', 'color: #ffffff; font-weight: bold;');
+        console.log('%c╠═══════════════════════════════════╣', 'color: #ffffff; font-weight: bold;');
+        console.log('%c║  ✓ WordPress/Yoast Support        ║', 'color: #00ff00;');
+        console.log('%c║  ✓ 5 Fetch Methods Active         ║', 'color: #00ff00;');
+        console.log('%c║  ✓ Flexible SEO Generation        ║', 'color: #00ff00;');
+        console.log('%c║  ✓ Bilingual Interface (EN/RU)    ║', 'color: #00ff00;');
+        console.log('%c╚═══════════════════════════════════╝', 'color: #ffffff; font-weight: bold;');
+    </script>
+</body>
+</html>
